@@ -37,8 +37,9 @@ class Linkedin(object):
         self.client = Client(refresh_cookies=refresh_cookies, debug=debug, proxies=proxies)
         self.client.authenticate(username, password)
         logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
-        self.results = []
+        self.company_post_results = []
         self.logger = logger
+        self.logger.info("linkedin_api: joragasy version.. forked from nsandaman")
 
     def _fetch(self, uri, evade=default_evade, **kwargs):
         """
@@ -301,9 +302,9 @@ class Linkedin(object):
 
     def get_company_posts(self,public_id):
         posts = self.get_company_updates(public_id)
-        self.results = []
+        self.company_post_results = []
         return posts
-        
+
     def get_company_updates(
         self, public_id=None, urn_id=None, max_results=None
     ):
@@ -318,7 +319,7 @@ class Linkedin(object):
             "q": "companyFeedByUniversalName",
             "moduleKey": "member-share",
             "count": Linkedin._MAX_UPDATE_COUNT,
-            "start": len(self.results),
+            "start": len(self.company_post_results),
         }
 
         res = self._fetch(f"/feed/updates", params=params)
@@ -327,19 +328,19 @@ class Linkedin(object):
 
         if (
             len(data["elements"]) == 0
-            or (max_results is not None and len(self.results) >= max_results)
+            or (max_results is not None and len(self.company_post_results) >= max_results)
             or (
                 max_results is not None
-                and len(self.results) / max_results >= Linkedin._MAX_REPEATED_REQUESTS
+                and len(self.company_post_results) / max_results >= Linkedin._MAX_REPEATED_REQUESTS
             )
         ):
-            return self.results
+            return self.company_post_results
 
-        self.results.extend(data["elements"])
-        self.logger.debug(f"results grew: {len(self.results)}")
+        self.company_post_results.extend(data["elements"])
+        self.logger.debug(f"results grew: {len(self.company_post_results)}")
 
         return self.get_company_updates(
-            public_id=public_id, urn_id=urn_id, results=self.results, max_results=max_results
+            public_id=public_id, urn_id=urn_id, max_results=max_results
         )
 
     def get_profile_updates(
