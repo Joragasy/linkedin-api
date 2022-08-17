@@ -34,7 +34,7 @@ So specifically, this project aims to provide complete coverage for Voyager.
 ## Installation
 
 ```
-$ pip install linkedin-api
+$ bash install.sh
 ```
 
 ### Example usage
